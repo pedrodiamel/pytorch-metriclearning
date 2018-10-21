@@ -381,50 +381,27 @@ class TripletNeuralNet(NeuralNet):
             emb = pytutils.to_np(emb)
         return emb
 
-
-    def representation(self, data_loader):
-        """"
-        Representation
-            -data_loader: simple data loader for image
-        """
-                
-        batch_time = AverageMeter()
-        
-        n = len(data_loader)*data_loader.batch_size
-        # embebed features 
-        embX = np.zeros( (n,self.num_output_channels) )
-        embY = np.zeros( (n,1) )
-        k=0
-        
-        # switch to evaluate mode
+    
+    
+    def representation(self, dataloader ):           
+        zs = []
+        ys = []
+        n = len(dataloader)
         self.net.eval()
         with torch.no_grad():
-            end = time.time()
-            for i, sample in enumerate( tqdm(data_loader) ):
-                            
-                # get data (image, label)
-                inputs, targets = sample['image'], pytutils.argmax(sample['label'])
-                inputs_var = pytutils.to_var(inputs, self.cuda, False, True )
-
-                # representation
-                emb = self.fcn(inputs_var)
-                emb = pytutils.to_np(emb)
-                for j in range(emb.shape[0]):
-                    embX[k,:] = emb[j,:]
-                    embY[k] = targets[j]
-                    k+=1
-
-                # measure elapsed time
-                batch_time.update(time.time() - end)
-                end = time.time()
-
-        embX = embX[:k,:]
-        embY = embY[:k]
-
-
-        return embX, embY
-
-
+            for i, sample in enumerate( tqdm( dataloader ) ):
+                x, y = sample['image'], sample['label']
+                y = y.argmax(1).float()                        
+                if self.cuda:
+                    x = x.cuda()
+                z = self.fcn(x)                
+                zs.append( z.data.cpu() )
+                ys.append( y )   
+        
+        zs = np.concatenate( zs, axis=0)
+        ys = np.concatenate( ys, axis=0)                
+        return zs, ys
+    
 
     def inference(self):
         pass       

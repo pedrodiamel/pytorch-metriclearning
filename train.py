@@ -20,7 +20,7 @@ from pytvision import visualization as view
 # LOCAL MODULE
 from torchlib.datasets import TripletsDataset
 from torchlib.datasets.factory  import FactoryDataset
-from torchlib.tripletneuralnet import TripletNeuralNet
+from torchlib.neuralnet import TripletNeuralNet
 from misc import get_transforms_aug, get_transforms_det
 
 
@@ -172,7 +172,7 @@ def main():
 
     num_train = len(train_data)
     sampler = SubsetRandomSampler(np.random.permutation( num_train ) )
-    train_loader = DataLoader(train_data, batch_size=args.batch_size, sampler=sampler, num_workers=args.workers
+    train_loader = DataLoader(train_data, batch_size=args.batch_size_train, sampler=sampler, num_workers=args.workers
             , pin_memory=network.cuda, drop_last=True)
     
     # validate dataset
@@ -189,7 +189,7 @@ def main():
 
     num_val = len(val_data)
     sampler = SubsetRandomSampler(np.random.permutation( num_val ) )
-    val_loader = DataLoader(val_data, batch_size=args.batch_size, sampler=sampler, num_workers=args.workers
+    val_loader = DataLoader(val_data, batch_size=args.batch_size_test, sampler=sampler, num_workers=args.workers
         , pin_memory=network.cuda, drop_last=False)
        
 
