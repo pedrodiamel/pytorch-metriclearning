@@ -24,12 +24,152 @@ from pytvision import graphic as gph
 from pytvision import netlearningrate
 
 #LOCAL MODULE
-from . import embmodels as embnn
-from . import tripletlosses as losses
+from . import models as embnn
+from . import netlosses as losses
 from . import tripletnet as tnn
 
 
-class TripletNeuralNet(NeuralNetAbstract):
+
+class NeuralNet(NeuralNetAbstract):
+    r"""NeuralNet Model in embedded space 
+    Args:
+        patchproject (str): path project
+        nameproject (str):  name project
+        no_cuda (bool): system cuda (default is True)
+        parallel (bool):
+        seed (int):
+        print_freq (int):
+        gpu (int):
+    """
+
+    def __init__(self,
+        patchproject,
+        nameproject,
+        no_cuda=True,
+        parallel=False,
+        seed=1,
+        print_freq=10,
+        gpu=0
+        ):
+        super(NeuralNet, self).__init__( patchproject, nameproject, no_cuda, parallel, seed, print_freq, gpu  )
+
+    def create(self, 
+        arch, 
+        num_output_channels, 
+        num_input_channels,  
+        loss, 
+        lr,  
+        optimizer, 
+        lrsch,
+        momentum=0.9,
+        weight_decay=5e-4,          
+        pretrained=False,
+        classes=10,
+        size_input=128,
+        ):
+        """
+        Create
+        Args:
+            arch (string): architecture
+            num_output_channels, 
+            num_input_channels,  
+            loss (string):
+            lr (float): learning rate
+            momentum,
+            optimizer (string) : 
+            lrsch (string): scheduler learning rate
+            pretrained (bool)
+        """
+
+        self.size_input = size_input
+        self.num_classes = classes
+        cfg_opt={ 'momentum':momentum, 'weight_decay':weight_decay } 
+        cfg_scheduler={ 'step_size':100, 'gamma':0.1  }
+        
+
+        super(NeuralNet, self).create( 
+            arch, 
+            num_output_channels, 
+            num_input_channels, 
+            loss, 
+            lr, 
+            optimizer, 
+            lrsch, 
+            pretrained,
+            cfg_opt=cfg_opt, 
+            cfg_scheduler=cfg_scheduler,
+            )    
+
+    def _create_model(self, arch, num_output_channels, num_input_channels, pretrained):
+        """
+        Create model
+            arch (string): select architecture
+            num_input_channels (int)
+            num_output_channels (int)
+            pretrained (bool)
+        """    
+
+        self.fcn = None
+        self.net = None
+        
+        kw = {'dim': num_output_channels, 'num_channels': num_input_channels, 'pretrained': pretrained}
+        self.fcn = embnn.__dict__[arch](**kw)
+        self.net = tnn.Tripletnet( self.fcn )
+        
+        self.s_arch = arch 
+        self.num_output_channels = num_output_channels
+        self.num_input_channels = num_input_channels
+        self.pretrained = pretrained
+
+        if self.cuda == True:
+            self.net.cuda()
+        if self.parallel == True and self.cuda == True:
+            self.net = nn.DataParallel(self.net, device_ids= range( torch.cuda.device_count() ))
+ 
+
+
+    def save(self, epoch, prec, is_best=False, filename='checkpoint.pth.tar'):
+        """
+        Save model
+        """
+        print('>> save model epoch {} ({}) in {}'.format(epoch, prec, filename))
+        net = self.net.module if self.parallel else self.net
+        pytutils.save_checkpoint(
+            {
+                'epoch': epoch + 1,
+                'arch': self.s_arch,
+                'imsize': self.size_input,
+                'num_output_channels': self.num_output_channels,
+                'num_input_channels': self.num_input_channels,
+                'num_classes': self.num_classes,
+                'state_dict': net.state_dict(),
+                'prec': prec,
+                'optimizer' : self.optimizer.state_dict(),
+            }, 
+            is_best,
+            self.pathmodels,
+            filename
+            )
+
+    def load(self, pathnamemodel):
+        bload = False
+        if pathnamemodel:
+            if os.path.isfile(pathnamemodel):
+                print("=> loading checkpoint '{}'".format(pathnamemodel))
+                checkpoint = torch.load( pathnamemodel ) if self.cuda else torch.load( pathnamemodel, map_location=lambda storage, loc: storage )                
+                self.num_classes = checkpoint['num_classes']
+                self._create_model(checkpoint['arch'], checkpoint['num_output_channels'], checkpoint['num_input_channels'], False )                
+                self.size_input = checkpoint['imsize'] 
+                self.net.load_state_dict( checkpoint['state_dict'] )              
+                print("=> loaded checkpoint for {} arch!".format(checkpoint['arch']))
+                bload = True
+            else:
+                print("=> no checkpoint found at '{}'".format(pathnamemodel))        
+        return bload            
+
+
+
+class TripletNeuralNet(NeuralNet):
     """
     Triplet Neural Net Class
     """
@@ -55,38 +195,59 @@ class TripletNeuralNet(NeuralNetAbstract):
         """
 
         super(TripletNeuralNet, self).__init__( patchproject, nameproject, no_cuda, parallel, seed, print_freq, gpu  )
-
-        # Set the graphic visualization
-        self.bgraphshow = False
-        self.sc = gph.VisdomScatter(env_name=nameproject)
-        self.fcn = None
         
-    def create(self,         
-        arch, 
+        # Set the graphic visualization
+        self.fcn = None
+
+
+       
+    def create(
+        self,
+        arch,
         num_output_channels, 
-        num_input_channels, 
+        num_input_channels,  
         loss, 
-        lr, 
-        momentum, 
-        optimizer, 
-        lrsch,  
-        pretrained=False, 
+        lr,
+        optimizer,
+        lrsch,
+        momentum=0.9,
+        weight_decay=5e-4,          
+        pretrained=False,
+        classes=10,
+        size_input=128,
         margin=1,
         ):
         """
-        Create            
-            -arch (string): architecture
-            -num_output_channels, 
-            -num_input_channels,
-            -loss (string):
-            -lr (float): learning rate
-            -optimizer (string) : 
-            -lrsch (string): scheduler learning rate
-            -pretrained (bool)
+        Create
+        Args:
+            arch (string): architecture
+            num_output_channels, 
+            num_input_channels,  
+            loss (string):
+            lr (float): learning rate
+            momentum,
+            optimizer (string) : 
+            lrsch (string): scheduler learning rate
+            pretrained (bool)
         """
-
-        self.margin = margin 
-        super(TripletNeuralNet, self).create( arch, num_output_channels, num_input_channels, loss, lr, momentum, optimizer, lrsch, pretrained)
+       
+        self.margin = margin
+        super(TripletNeuralNet, self).create( 
+            arch, 
+            num_output_channels, 
+            num_input_channels, 
+            loss, 
+            lr, 
+            optimizer, 
+            lrsch, 
+            momentum,
+            weight_decay,
+            pretrained,
+            classes,
+            size_input,
+            )
+        
+        
         self.accuracy = losses.Accuracy( )
 
         # Set the graphic visualization
@@ -148,7 +309,6 @@ class TripletNeuralNet(NeuralNetAbstract):
   
     def evaluate(self, data_loader, epoch=0):
         
-
         self.logger_val.reset()
         batch_time = AverageMeter()
         
@@ -217,10 +377,8 @@ class TripletNeuralNet(NeuralNetAbstract):
         self.net.eval()
         with torch.no_grad():
             x = image.cuda() if self.cuda else image  
-            x  = Variable(x, requires_grad=False, volatile=True )
             emb = self.fcn(x)
             emb = pytutils.to_np(emb)
-
         return emb
 
 
@@ -275,30 +433,8 @@ class TripletNeuralNet(NeuralNetAbstract):
         train_loader.dataset.reset()
         val_loader.dataset.reset()
 
-    def _create_model(self, arch, num_output_channels, num_input_channels, pretrained):
-        """
-        Create model
-            -arch: select architecture
-        """        
-        self.fcn = None
-        self.net = None
-        self.size_input = 0      
 
-        kw = {'out_dim':num_output_channels, 'num_channels':num_input_channels, 'pretrained': pretrained}
-        self.fcn = embnn.__dict__[arch](**kw)
-        
-        self.net = tnn.Tripletnet( self.fcn )
-        self.arch = arch
 
-        self.size_input = self.fcn.size_input
-        self.num_input_channels = num_input_channels
-        self.num_output_channels = num_output_channels
-
-        if self.cuda == True:
-            self.net.cuda()
-        if self.parallel == True and self.cuda == True:
-            self.net = nn.DataParallel(self.net, device_ids=range(torch.cuda.device_count()))
-    
     def _create_loss(self, loss):
         """
         Create loss
@@ -308,7 +444,7 @@ class TripletNeuralNet(NeuralNetAbstract):
 
         # loss to use
         if loss == 'hinge':
-            self.criterion = losses.EmbHingeLoss ( margin=self.margin )
+            self.criterion = losses.EmbHingeLoss( margin=self.margin )
         elif loss == 'square':
             self.criterion = losses.EmbSquareHingeLoss( margin=self.margin ) 
         elif loss == 'soft':

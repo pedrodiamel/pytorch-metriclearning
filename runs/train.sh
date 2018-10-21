@@ -2,12 +2,14 @@
 
 # parameters
 DATA=$HOME/.datasets
-NAMEDATASET='cifar10'
+NAMEDATASET='ferp'
 PROJECT='../out/tripletruns'
 EPOCHS=60
-BATCHSIZE=60
+BATCHSIZETRAIN=240
+BATCHSIZETEST=500
 LEARNING_RATE=0.0001
 MOMENTUM=0.5
+WEIGHT_DECAY=0.0005
 PRINT_FREQ=100
 WORKERS=60
 RESUME='chk000000xxx.pth.tar'
@@ -15,14 +17,15 @@ GPU=0
 ARCH='embresnet18'
 LOSS='hinge'
 OPT='adam'
-SCHEDULER='fixed'
+SCHEDULER='step'
 SNAPSHOT=5
 NUMCHANNELS=3
+NUMCLASS=8
 MARGIN=1
 TRAINSIZE=100000
 VALSIZE=10000
-EMB=32
-EXP_NAME='exp_triplet_'$ARCH'_'$LOSS'_'$OPT'_'$NAMEDATASET'_emb'$EMB'_001'
+DIM=32
+EXP_NAME='triplet_'$ARCH'_'$LOSS'_'$OPT'_'$NAMEDATASET'_emb'$DIM'_001'
 
 
 rm -rf $PROJECT/$EXP_NAME/$EXP_NAME.log
@@ -32,12 +35,13 @@ mkdir $PROJECT/$EXP_NAME
 
 
 ## execute
-python ../classification_tripletloss_train.py \
+python ../train.py \
 $DATA \
 --project=$PROJECT \
 --name=$EXP_NAME \
 --epochs=$EPOCHS \
---batch-size=$BATCHSIZE \
+--batch-size-train=$BATCHSIZETRAIN \
+--batch-size-test=$BATCHSIZETEST \
 --learning-rate=$LEARNING_RATE \
 --momentum=$MOMENTUM \
 --print-freq=$PRINT_FREQ \
@@ -50,7 +54,8 @@ $DATA \
 --scheduler=$SCHEDULER \
 --arch=$ARCH \
 --margin=$MARGIN \
---emb-dim=$EMB \
+--dim=$DIM \
+--num-classes=$NUMCLASS \
 --triplet-size-train=$TRAINSIZE \
 --triplet-size-val=$VALSIZE \
 --name-dataset=$NAMEDATASET \
