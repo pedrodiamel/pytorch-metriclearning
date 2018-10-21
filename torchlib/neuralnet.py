@@ -378,7 +378,6 @@ class TripletNeuralNet(NeuralNet):
         with torch.no_grad():
             x = image.cuda() if self.cuda else image  
             emb = self.fcn(x)
-            emb = pytutils.to_np(emb)
         return emb
 
     
