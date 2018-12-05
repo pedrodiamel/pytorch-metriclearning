@@ -444,7 +444,8 @@ class NeuralNetTripletEnsamble( ens.NeuralNetEnsamble ):
         
     def create(self, datamodels ): 
         
-        for path, modelname in datamodels:
+        for model in datamodels:
+            path, modelname = model['path'], model['name']
             net = NeuralNetTriplet( 
                 patchproject=" ",  
                 nameproject=path, 

@@ -4,6 +4,7 @@
 DATA=$HOME/.datasets
 NAMEDATASET='ferp'
 PROJECT='../out/tripletruns'
+PATHMODELSCONF='../modelsconf.json'
 EPOCHS=2000
 BATCHSIZETRAIN=120
 BATCHSIZETEST=120
@@ -21,6 +22,8 @@ SNAPSHOT=5
 NUMCLASS=8
 NUMCHANNELS=3
 IMAGESIZE=64
+TRAINSIZE=100000
+VALSIZE=10000
 EXP_NAME='expert_'$ARCH'_'$LOSS'_'$OPT'_'$NAMEDATASET'_001'
 
 rm -rf $PROJECT/$EXP_NAME/$EXP_NAME.log
@@ -33,6 +36,7 @@ python ../train_ens.py \
 $DATA \
 --project=$PROJECT \
 --name=$EXP_NAME \
+--pathmodelsconf=$PATHMODELSCONF \
 --epochs=$EPOCHS \
 --batch-size-train=$BATCHSIZETRAIN \
 --batch-size-test=$BATCHSIZETEST \
@@ -47,6 +51,8 @@ $DATA \
 --snapshot=$SNAPSHOT \
 --scheduler=$SCHEDULER \
 --arch=$ARCH \
+--size-train=$TRAINSIZE \
+--size-val=$VALSIZE \
 --num-classes=$NUMCLASS \
 --name-dataset=$NAMEDATASET \
 --channels=$NUMCHANNELS \

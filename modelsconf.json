@@ -1,0 +1,13 @@
+
+{
+    "models": [
+        { "path": "../../pytorch-classification/out/netruns/exp_baseline_preactresnet18_cross_sgd_ferp_aug_002",  
+          "name": "model_best.pth.tar"
+        }, 
+        { "path": "../../pytorch-classification/out/netruns/exp_baseline_preactresnet18_cross_sgd_ferp_aug_002",  
+          "name": "model_best.pth.tar"
+        }
+        
+    ]
+}
+

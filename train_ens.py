@@ -5,6 +5,7 @@ import os
 import numpy as np
 import cv2
 import random
+import json
 
 # TORCH MODULE
 import torch
@@ -83,8 +84,17 @@ def arg_parser():
     parser.add_argument('--name-dataset', default='mnist', type=str,
                         help='name dataset')
     
+    parser.add_argument('--pathmodelsconf', default='../modelsconf.json', type=str,
+                        help='pathname of the configuration models on the ensamble')  
+
     parser.add_argument('--channels', default=1, type=int, metavar='N',
                         help='input channel (default: 1)')
+
+    parser.add_argument('--size-train', default=1000, type=int, metavar='N', 
+                        help='data for training size (default: 1000)')
+    parser.add_argument('--size-val', default=100, type=int, metavar='N', 
+                        help='data size for validation (default: 100)')
+
 
     return parser
 
@@ -113,17 +123,12 @@ def main():
         gpu=args.gpu,
         )
 
-    
-    datamodels = [
-        ['../out/tripletruns/triplet_preactresembnet18_hinge_adam_ferp_emb32_001', 'chk000023.pth.tar'],
-        ['../out/tripletruns/triplet_preactresembnet18_hinge_adam_ferp_emb32_001', 'chk000024.pth.tar'],
-        ['../out/tripletruns/triplet_preactresembnet18_hinge_adam_ferp_emb32_001', 'chk000025.pth.tar'],   
-        ['../out/tripletruns/triplet_preactresembnet18_hinge_adam_ferp_emb32_001', 'chk000028.pth.tar'],
-        ]
+    with open(args.pathmodelsconf, "r" ) as f: 
+        modelconfig = json.load(f)
     
     network.create( 
         arch=args.arch,
-        datamodels=datamodels,
+        datamodels=modelconfig['models'],
         num_output_channels=args.num_classes, 
         num_input_channels=args.channels, 
         loss=args.loss,
@@ -145,13 +150,6 @@ def main():
     print(network)
 
     
-    #train_transform = transforms.Compose(
-    #[         
-    #    transforms.RandomCrop( network.size_input , padding=4 ), 
-    #    transforms.RandomHorizontalFlip(),
-    #    
-    #])
-    
     # datasets
     # training dataset
     train_data = Dataset(
@@ -162,7 +160,7 @@ def main():
             #transform=train_transform , 
             download=True 
         ),
-        #count=100000,
+        count=args.size_train,
         num_channels=network.num_input_channels,
         transform=get_transforms_aug( network.size_input ), #get_transforms_aug
         )
@@ -180,6 +178,7 @@ def main():
             subset=FactoryDataset.validation, 
             download=True 
         ),
+        count=args.size_val,
         num_channels=network.num_input_channels,
         transform=get_transforms_det( network.size_input ),
         )
