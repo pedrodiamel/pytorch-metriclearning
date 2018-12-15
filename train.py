@@ -164,12 +164,11 @@ def main():
             name=args.name_dataset, 
             subset=FactoryDataset.training, 
             download=True 
-            ),
+            ),        
         num_channels=network.num_input_channels,
         n_triplets=args.triplet_size_train,
         transform=get_transforms_aug( network.size_input ),
         )
-
     num_train = len(train_data)
     sampler = SubsetRandomSampler(np.random.permutation( num_train ) )
     train_loader = DataLoader(train_data, batch_size=args.batch_size_train, sampler=sampler, num_workers=args.workers

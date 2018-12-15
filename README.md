@@ -36,6 +36,12 @@ To use Visdom in the browser:
 | PreActResEmbNet34 |             |             |
 
 
+| Model             | Ferp        | Ck+         | Jaffe       | Bu3dfe      | afew        |
+| ----------------- | ----------- | ----------- | ----------- | ----------- | ----------- |
+| PreActResEmbNet18 |             |             |             |             |             |
+| PreActResEmbNet34 |             |             |             |             |             |
+
+
 
 ## Ref
 - https://github.com/kuangliu/pytorch-cifar
