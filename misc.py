@@ -40,8 +40,7 @@ def get_transforms_aug( size_input ):
         mtrans.RandomCrop( (size_input, size_input), limit=2, padding_mode=cv2.BORDER_REPLICATE  ) , 
         
         #------------------------------------------------------------------
-        #Geometric 
-        
+        #Geometric         
         mtrans.RandomScale(factor=0.2, padding_mode=cv2.BORDER_REPLICATE ), 
         mtrans.ToRandomTransform( mtrans.RandomGeometricalTransform( angle=30, translation=0.2, warp=0.02, padding_mode=cv2.BORDER_REPLICATE ), prob=0.5 ),
         mtrans.ToRandomTransform( mtrans.VFlip(), prob=0.5 ),
@@ -71,6 +70,7 @@ def get_transforms_aug( size_input ):
         #------------------------------------------------------------------
         mtrans.ToTensor(),
         normalize,
+        
         ])    
     return transforms_aug
 

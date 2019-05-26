@@ -193,7 +193,6 @@ class NeuralNetTriplet(NeuralNet):
             -print_freq (int)
             -gpu (int)
         """
-
         super(NeuralNetTriplet, self).__init__( patchproject, nameproject, no_cuda, parallel, seed, print_freq, gpu  )
         
         # Set the graphic visualization
@@ -243,8 +242,7 @@ class NeuralNetTriplet(NeuralNet):
             pretrained,
             classes,
             size_input,
-            )
-        
+            )        
         
         self.accuracy = losses.Accuracy( )
 
@@ -370,7 +368,6 @@ class NeuralNetTriplet(NeuralNet):
 
 
     def __call__(self, image):
-
         # switch to evaluate mode
         self.net.eval()
         with torch.no_grad():
@@ -406,7 +403,6 @@ class NeuralNetTriplet(NeuralNet):
     def _to_end_epoch(self, epoch, epochs, train_loader, val_loader):
         train_loader.dataset.reset()
         val_loader.dataset.reset()
-
 
 
     def _create_loss(self, loss):
