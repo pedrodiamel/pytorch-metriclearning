@@ -121,6 +121,7 @@ def main():
     [ print('\t* {}: {}'.format(k,v) ) for k,v in vars(args).items() ]
     print('')
 
+
     network = NeuralNetTriplet(
         patchproject=args.project,
         nameproject=args.name,
@@ -172,7 +173,7 @@ def main():
     num_train = len(train_data)
     sampler = SubsetRandomSampler(np.random.permutation( num_train ) )
     train_loader = DataLoader(train_data, batch_size=args.batch_size_train, sampler=sampler, num_workers=args.workers
-            , pin_memory=network.cuda, drop_last=True)
+            ,pin_memory=network.cuda, drop_last=True)
     
     # validate dataset
     val_data = TripletsDataset(
@@ -189,7 +190,7 @@ def main():
     num_val = len(val_data)
     sampler = SubsetRandomSampler(np.random.permutation( num_val ) )
     val_loader = DataLoader(val_data, batch_size=args.batch_size_test, sampler=sampler, num_workers=args.workers
-        , pin_memory=network.cuda, drop_last=False)
+        ,pin_memory=network.cuda, drop_last=False)
        
 
     print('Load datset')

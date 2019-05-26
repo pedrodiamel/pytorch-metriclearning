@@ -1,8 +1,12 @@
 # Pytorch Metric Learning
 
-## Methods 
+## TODO 
 
-- TripletLoss
+- [ ] Margin contrastive loss, semi-hard 
+- [ ] Lifted structured embedding
+- [X] TripletLoss
+- [ ] Manifold
+
 
 ## Training
     
@@ -28,18 +32,7 @@ To use Visdom in the browser:
     # http://localhost:8097/
 
 
-## Accuracy
-
-| Model             | CIFAR10     | CIFAR100    |
-| ----------------- | ----------- | ----------- |
-| PreActResEmbNet18 |             |             |
-| PreActResEmbNet34 |             |             |
-
-
-| Model             | Ferp        | Ck+         | Jaffe       | Bu3dfe      | afew        |
-| ----------------- | ----------- | ----------- | ----------- | ----------- | ----------- |
-| PreActResEmbNet18 |             |             |             |             |             |
-| PreActResEmbNet34 |             |             |             |             |             |
+## Results
 
 
 
@@ -47,4 +40,7 @@ To use Visdom in the browser:
 - https://github.com/kuangliu/pytorch-cifar
 - https://github.com/Cadene/pretrained-models.pytorch
 - http://rodrigob.github.io/are_we_there_yet/build/classification_datasets_results.html
+- https://github.com/vadimkantorov/metriclearningbench
+
+
 

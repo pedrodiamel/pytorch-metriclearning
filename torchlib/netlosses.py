@@ -18,7 +18,6 @@ def one_hot_embedding(labels, num_classes):
     return y[labels.long()]     # [N,D]
 
 
-
 class EmbHingeLoss(nn.Module):
     r"""Creates a criterion that measures the triplet loss given an input
     tensors x1, x2, x3 and a margin with a value greater than 0.
