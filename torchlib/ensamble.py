@@ -100,7 +100,7 @@ class NeuralNetEnsamble( object ):
 
 class ExpertNet( nn.Module ):    
     
-    def __init__(self, ens, num_classes=10, dim=3, num_channels=3 ):
+    def __init__(self, ens, num_classes=10, dim=32, num_channels=3 ):
         super(ExpertNet, self).__init__()
         
         self.dim=dim
@@ -128,24 +128,25 @@ class ExpertNet( nn.Module ):
             nn.ReLU(inplace=True),
             nn.Conv2d(256, 256, kernel_size=3, padding=1),
             nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=3, stride=2),
+            #nn.MaxPool2d(kernel_size=3, stride=2),
             
         )       
-        self.exp = nn.Linear( 256 , self.out_expert * 32 )     #3600       
+        self.exp = nn.Linear( 2304, self.out_expert * self.dim )     #3600, 1024, 256       
         self.cls = nn.Linear(self.dim, num_classes )
         
         
         
     def forward(self, x):  
         
-        x_ens = self.ens(x)                         #[n, dim, m]      
+        x_ens = self.ens(x).detach()                #[n, dim, m]      
         x_exp = self.cnn(x)                
         x_exp = x_exp.view(x_exp.shape[0], -1 )     #[n, m]         
         x_exp = self.exp( x_exp )        
         #x_exp = F.sigmoid( x_exp )
-        x_exp = F.relu( x_exp )  
+        x_exp = F.relu( x_exp ) 
+        x_exp = x_exp.view(x_exp.shape[0], self.dim, -1 ) #[n, dim, m]     
         
-        x_exp = x_exp.view(x_exp.shape[0], 32, -1 ) #[n, dim, m]           
+        
         #x_exp = x_exp.unsqueeze(dim=1)             #[n, 1, m]                
         x = (x_ens * x_exp).sum(dim=2)              #[n, dim]
         x = self.cls(x)
