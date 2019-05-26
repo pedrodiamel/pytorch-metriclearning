@@ -147,7 +147,7 @@ class PreActResEmbNet(nn.Module):
         self.dim = dim
         self.num_channels=num_channels
         self.size_input=32 
-        self.conv_dim_out = initial_channels*8*block.expansion #ex: 64*8*4
+        self.conv_dim_out = initial_channels*8*block.expansion*1 #ex:*4 64*8*4
 
         self.conv1 = nn.Conv2d(num_channels, initial_channels, kernel_size=3, stride=1, padding=1, bias=False)
         self.layer1 = self._make_layer(block, initial_channels, num_blocks[0], stride=1)
@@ -172,7 +172,7 @@ class PreActResEmbNet(nn.Module):
         out = self.layer2(out)
         out = self.layer3(out)
         out = self.layer4(out)
-        out = F.avg_pool2d(out, out.shape[3] )        
+        out = F.avg_pool2d(out, 4 ) #out.shape[3]        
         out = out.view(out.size(0), -1)
         out = self.linear(out)
         return out
@@ -242,13 +242,12 @@ def preactresembnetex18( pretrained=False, **kwargs ):
 def test():
     num_channels=1
     num_classes=10
-    dim=10
-    
-    net = preactresembnetex18( False, dim=dim, num_channels=num_channels, num_classes=num_classes )
-    xemb, y = net(  torch.randn(1, num_channels, 48, 48 ) ) 
-    
+    dim=10    
+    #net = preactresembnetex18( False, dim=dim, num_channels=num_channels, num_classes=num_classes )
+    net = preactresembnet18( False, dim=dim, num_channels=num_channels )
+    xemb = net(  torch.randn(1, num_channels, 64, 64 ) )
     print( xemb.shape)
-    print( y.shape )
+    #print( y.shape )
 
 #test()
 
