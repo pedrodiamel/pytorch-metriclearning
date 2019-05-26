@@ -306,7 +306,8 @@ class TripletsDataset( object ):
 
         a = ObjectImageAndLabelTransform( img1, lab1 )
         b = ObjectImageAndLabelTransform( img2, lab2 )
-        c = ObjectImageAndLabelTransform( img3, lab3 )          
+        c = ObjectImageAndLabelTransform( img3, lab3 )         
+        
         if self.transform is not None:
             a = self.transform( a )
             b = self.transform( b )
