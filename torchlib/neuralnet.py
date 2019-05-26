@@ -29,7 +29,6 @@ from . import netlosses as losses
 from . import tripletnet as tnn
 
 
-
 class NeuralNet(NeuralNetAbstract):
     r"""NeuralNet Model in embedded space 
     Args:
