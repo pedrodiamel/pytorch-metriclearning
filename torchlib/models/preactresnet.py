@@ -147,7 +147,7 @@ class PreActResEmbNet(nn.Module):
         self.dim = dim
         self.num_channels=num_channels
         self.size_input=32 
-        self.conv_dim_out = initial_channels*8*block.expansion*4 #ex: 64*8*4
+        self.conv_dim_out = initial_channels*8*block.expansion*1 #ex:*4 64*8*4
 
         self.conv1 = nn.Conv2d(num_channels, initial_channels, kernel_size=3, stride=1, padding=1, bias=False)
         self.layer1 = self._make_layer(block, initial_channels, num_blocks[0], stride=1)
