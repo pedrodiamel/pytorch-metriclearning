@@ -272,7 +272,7 @@ class NeuralNetTriplet(NeuralNet):
             # compute output
             embedded_a, embedded_p, embedded_n = self.net(data_anch, data_pos, data_neg)
             target = torch.FloatTensor(embedded_a.size()[1]).fill_(1)
-            target = pytutils.to_var( target, self.cuda)
+            target = pytutils.to_var( target, self.cuda )
 
             # measure accuracy and record loss
             loss_triplet = self.criterion(embedded_a, embedded_p, embedded_n, target)
@@ -287,7 +287,7 @@ class NeuralNetTriplet(NeuralNet):
 
             # update
             self.logger_train.update(
-                {'loss': loss.data[0] },
+                {'loss': loss.cpu().item() },
                 {'acc': acc },
                 batch_size,
                 )       
@@ -331,7 +331,7 @@ class NeuralNetTriplet(NeuralNet):
 
                 # update
                 self.logger_val.update(
-                {'loss': loss.data[0] },
+                {'loss': loss.cpu().item() },
                 {'acc': acc },
                 batch_size,
                 )
