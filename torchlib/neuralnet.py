@@ -287,7 +287,7 @@ class NeuralNetTriplet(NeuralNet):
 
             # update
             self.logger_train.update(
-                {'loss': loss.data[0] },
+                {'loss': loss.data.item() },
                 {'acc': acc },
                 batch_size,
                 )       
@@ -331,7 +331,7 @@ class NeuralNetTriplet(NeuralNet):
 
                 # update
                 self.logger_val.update(
-                {'loss': loss.data[0] },
+                {'loss': loss.data.item() },
                 {'acc': acc },
                 batch_size,
                 )
