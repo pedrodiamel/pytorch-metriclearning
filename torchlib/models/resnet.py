@@ -255,9 +255,10 @@ class ResEmbNet(nn.Module):
         self.layer2 = self._make_layer(block, initial_channels*2, layers[1], stride=2)
         self.layer3 = self._make_layer(block, initial_channels*4, layers[2], stride=2)
         self.layer4 = self._make_layer(block, initial_channels*8, layers[3], stride=2)
-        self.avgpool = nn.AvgPool2d(7, stride=1)
+        self.avgpool = nn.AvgPool2d(7, stride=1)        
         self.fc = nn.Linear(self.conv_dim_out, dim)
 
+        
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
                 nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
@@ -293,6 +294,8 @@ class ResEmbNet(nn.Module):
         x = self.avgpool(x) # <-- [n, dim, w,h ] to [n, dim, 1,1 ]
         x = x.view(x.size(0), -1)
         x = self.fc(x)
+        
+        
         return x
     
 
@@ -306,6 +309,7 @@ def resnetemb18(pretrained=False, **kwargs):
     if pretrained:
         #model.load_state_dict(model_zoo.load_url(model_urls['resnet18']))
         utl.load_state_dict(model.state_dict(), model_zoo.load_url(model_urls['resnet18']))
+        pass
     return model
 
 

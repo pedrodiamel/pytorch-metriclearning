@@ -5,16 +5,16 @@ DATA=$HOME/.datasets
 NAMEDATASET='ferp'
 PROJECT='../out/tripletruns'
 EPOCHS=150
-BATCHSIZETRAIN=512
-BATCHSIZETEST=512
+BATCHSIZETRAIN=240
+BATCHSIZETEST=240
 LEARNING_RATE=0.0001
 MOMENTUM=0.5
 WEIGHT_DECAY=0.0005
 PRINT_FREQ=75
-WORKERS=9
+WORKERS=10
 RESUME='model_best.pth.tar'
 GPU=0
-ARCH='preactresembnet18'
+ARCH='resnetemb18' # preactresembnet18, fmpemb, resnetemb18, cvggemb13, alexembnet
 LOSS='hinge'
 OPT='adam'
 SCHEDULER='fixed'
@@ -25,7 +25,7 @@ MARGIN=1
 TRAINSIZE=100000
 VALSIZE=1000
 DIM=64
-IMAGESIZE=32
+IMAGESIZE=224
 EXP_NAME='triplet_'$ARCH'_'$LOSS'_'$OPT'_'$NAMEDATASET'_emb'$DIM'_imsize'$IMAGESIZE'_000'
 
 
@@ -36,7 +36,7 @@ mkdir $PROJECT/$EXP_NAME
 
 
 ## execute
-CUDA_VISIBLE_DEVICES=1,2,3  python ../train.py \
+CUDA_VISIBLE_DEVICES=2,3 python ../train.py \
 $DATA \
 --project=$PROJECT \
 --name=$EXP_NAME \

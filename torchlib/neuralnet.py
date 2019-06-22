@@ -277,7 +277,7 @@ class NeuralNetTriplet(NeuralNet):
             # measure accuracy and record loss
             loss_triplet = self.criterion(embedded_a, embedded_p, embedded_n, target)
             loss_embedd = embedded_a.norm(2) + embedded_p.norm(2) + embedded_n.norm(2)
-            loss = loss_triplet + 0.001 * loss_embedd
+            loss = loss_triplet #+ 0.001 * loss_embedd
             acc = self.accuracy(embedded_a, embedded_p, embedded_n)
               
             # optimizer
@@ -326,7 +326,7 @@ class NeuralNetTriplet(NeuralNet):
                 # measure accuracy and record loss
                 loss_triplet = self.criterion(embedded_a, embedded_p, embedded_n, target)
                 loss_embedd = embedded_a.norm(2) + embedded_p.norm(2) + embedded_n.norm(2)
-                loss = loss_triplet + 0.001 * loss_embedd
+                loss = loss_triplet #+ 0.001 * loss_embedd
                 acc = self.accuracy(embedded_a, embedded_p, embedded_n)
 
                 # update
