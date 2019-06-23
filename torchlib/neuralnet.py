@@ -290,7 +290,7 @@ class NeuralNetTriplet(NeuralNet):
             #print(batch_size,  (embedded_a-embedded_p).norm(), (embedded_n-embedded_p).norm()  ,loss_triplet, flush=True)
                         
             loss_embedd = embedded_a.norm(2) + embedded_p.norm(2) + embedded_n.norm(2)
-            loss = loss_triplet   #+ 0.001 * loss_embedd
+            loss = loss_triplet + 0.001 * loss_embedd
             acc = self.accuracy(embedded_a, embedded_p, embedded_n)
             
             #print(i, flush=True)
@@ -354,7 +354,7 @@ class NeuralNetTriplet(NeuralNet):
                 
                 
                 loss_embedd = embedded_a.norm(2) + embedded_p.norm(2) + embedded_n.norm(2)
-                loss = loss_triplet #+ 0.001 * loss_embedd
+                loss = loss_triplet + 0.001 * loss_embedd
                 acc = self.accuracy(embedded_a, embedded_p, embedded_n)
 
                 # update

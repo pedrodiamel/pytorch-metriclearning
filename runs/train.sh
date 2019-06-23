@@ -14,7 +14,7 @@ PRINT_FREQ=50
 WORKERS=10
 RESUME='model_best.pth.tar'
 GPU=0
-ARCH='resnetemb18' # preactresembnet18, fmpemb, resnetemb18, cvggemb13, alexembnet
+ARCH='fmpemb' # preactresembnet18, fmpemb, resnetemb18, cvggemb13, alexembnet
 LOSS='hinge'
 OPT='adam'
 SCHEDULER='fixed'
@@ -25,7 +25,7 @@ MARGIN=1.0
 TRAINSIZE=160000
 VALSIZE=16000
 DIM=64
-IMAGESIZE=224
+IMAGESIZE=48
 EXP_NAME='triplet_'$ARCH'_'$LOSS'_'$OPT'_'$NAMEDATASET'_emb'$DIM'_imsize'$IMAGESIZE'_000'
 
 
@@ -36,7 +36,7 @@ mkdir $PROJECT/$EXP_NAME
 
 
 ## execute
-CUDA_VISIBLE_DEVICES=2,3 python ../train.py \
+CUDA_VISIBLE_DEVICES=0,1 python ../train.py \
 $DATA \
 --project=$PROJECT \
 --name=$EXP_NAME \

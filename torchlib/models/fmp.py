@@ -106,19 +106,19 @@ class FMPEMBNet(nn.Module):
             nn.Conv2d(num_channels, 64, kernel_size=5, stride=1, padding=2),
             nn.ReLU(inplace=True),
             nn.FractionalMaxPool2d(kernel_size=3, output_ratio=(0.5, 0.5)),
-            nn.BatchNorm2d(64),
+            #nn.BatchNorm2d(64),
             nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1),
             nn.ReLU(inplace=True),
             nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1),
             nn.ReLU(inplace=True),            
             nn.FractionalMaxPool2d(kernel_size=3, output_ratio=(0.5, 0.5)),
-            nn.BatchNorm2d(64),
+            #nn.BatchNorm2d(64),
             nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1),
             nn.ReLU(inplace=True),
             nn.Conv2d(128, 128, kernel_size=3, stride=1, padding=1),
             nn.ReLU(inplace=True),            
             nn.FractionalMaxPool2d(kernel_size=3, output_ratio=(0.5, 0.5)),  
-            nn.BatchNorm2d(128),
+            #nn.BatchNorm2d(128),
         )
         
         #self.embedded = nn.Linear(128 * 6 * 6, dim)

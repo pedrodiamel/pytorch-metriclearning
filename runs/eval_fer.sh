@@ -1,9 +1,11 @@
 #!/bin/bash
 
+# triplet_fmpemb_hinge_adam_ferp_emb64_imsize48_000
+# triplet_resnetemb18_hinge_adam_ferp_emb64_imsize224_000
 
 PATHDATASET='~/.datasets/'
 PROJECT='../out/tripletruns'
-PROJECTNAME='triplet_cvggemb13_hinge_adam_ferp_emb64_imsize64_000'
+PROJECTNAME='triplet_alexembnet_hinge_adam_ferp_emb64_imsize227_000'
 PATHNAMEOUT='../out'
 FILENAME='result.txt'
 PATHMODEL='models'
