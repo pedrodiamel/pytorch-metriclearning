@@ -327,7 +327,8 @@ class TripletsDataset( object ):
 
             class_idx = cx
             # a, b, c are index of labels where it's equal to class_idx        
-            a = np.array(random.choices( np.where(self.labels==class_idx)[0], k=int(ntriplets/nc) ))
+            a = np.array(random.choices( np.where(self.labels==class_idx)[0], k=int(ntriplets/nc) )) 
+            random.shuffle(a)
             b = np.array(random.choices( np.where(self.labels==class_idx)[0], k=int(ntriplets/nc) ))
 
             #while np.any((a-b)==0): #aligning check

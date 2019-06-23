@@ -166,6 +166,8 @@ class NeuralNet(NeuralNetAbstract):
                 print("=> no checkpoint found at '{}'".format(pathnamemodel))        
         return bload            
 
+    
+
 class NeuralNetTriplet(NeuralNet):
     """
     Triplet Neural Net Class
@@ -245,7 +247,7 @@ class NeuralNetTriplet(NeuralNet):
 
         # Set the graphic visualization
         self.logger_train = Logger( 'Trn', ['loss'], ['acc'], self.plotter  )
-        self.logger_val   = Logger( 'Val', ['loss'], ['acc'], self.plotter )
+        self.logger_val   = Logger( 'Val', ['loss'], ['acc'], self.plotter  )
 
 
 
@@ -257,28 +259,43 @@ class NeuralNetTriplet(NeuralNet):
 
         # switch to evaluate mode
         self.net.train()
-
         end = time.time()
         for i, sample in enumerate(data_loader):
            
             # measure data loading time
             data_time.update(time.time() - end)
 
-            anch = sample['b']; data_anch = pytutils.to_var(anch['image'], self.cuda)
-            pos  = sample['a']; data_pos  = pytutils.to_var( pos['image'], self.cuda)
-            neg  = sample['c']; data_neg  = pytutils.to_var( neg['image'], self.cuda)  
-            batch_size = data_pos.size(0)     
+            #anch = sample['b']; data_anch = pytutils.to_var(anch['image'], self.cuda)
+            #pos  = sample['a']; data_pos  = pytutils.to_var( pos['image'], self.cuda)
+            #neg  = sample['c']; data_neg  = pytutils.to_var( neg['image'], self.cuda)  
+            
+            data_pos  = sample['a']['image']
+            data_anch = sample['b']['image']
+            data_neg  = sample['c']['image']
+                
+            if self.cuda:
+                data_pos  = data_pos.cuda()
+                data_anch = data_anch.cuda()
+                data_neg  = data_neg.cuda()
+                
+            batch_size = data_pos.shape[0]    
             
             # compute output
             embedded_a, embedded_p, embedded_n = self.net(data_anch, data_pos, data_neg)
-            target = torch.FloatTensor(embedded_a.size()[1]).fill_(1)
-            target = pytutils.to_var( target, self.cuda)
-
+            target = torch.FloatTensor(embedded_a.size()[1]).fill_(1)           
+            if self.cuda: target = target.cuda()
+            
             # measure accuracy and record loss
             loss_triplet = self.criterion(embedded_a, embedded_p, embedded_n, target)
+            #print(batch_size,  (embedded_a-embedded_p).norm(), (embedded_n-embedded_p).norm()  ,loss_triplet, flush=True)
+                        
             loss_embedd = embedded_a.norm(2) + embedded_p.norm(2) + embedded_n.norm(2)
-            loss = loss_triplet #+ 0.001 * loss_embedd
+            loss = loss_triplet   #+ 0.001 * loss_embedd
             acc = self.accuracy(embedded_a, embedded_p, embedded_n)
+            
+            #print(i, flush=True)
+            #print(loss_triplet, flush=True)
+            
               
             # optimizer
             self.optimizer.zero_grad()
@@ -311,20 +328,31 @@ class NeuralNetTriplet(NeuralNet):
             end = time.time()
             for i, sample in enumerate(data_loader):
             
-                anch = sample['b']; data_anch = pytutils.to_var(anch['image'], self.cuda, False, True)
-                pos  = sample['a']; data_pos  = pytutils.to_var( pos['image'], self.cuda, False, True)
-                neg  = sample['c']; data_neg  = pytutils.to_var( neg['image'], self.cuda, False, True)       
-                batch_size = data_pos.size(0)       
+                #anch = sample['b']; data_anch = pytutils.to_var( anch['image'], self.cuda, False, True)
+                #pos  = sample['a']; data_pos  = pytutils.to_var( pos['image'], self.cuda, False, True)
+                #neg  = sample['c']; data_neg  = pytutils.to_var( neg['image'], self.cuda, False, True)   
+                                
+                data_pos  = sample['a']['image']
+                data_anch = sample['b']['image']
+                data_neg  = sample['c']['image']
+                
+                if self.cuda:
+                    data_pos  = data_pos.cuda()
+                    data_anch = data_anch.cuda()
+                    data_neg  = data_neg.cuda()
+                
+                batch_size = data_pos.shape[0]       
                 
                 # compute output
-                embedded_a, embedded_p, embedded_n = self.net(data_anch, data_pos, data_neg)                                       
-
-                # 1 means, dista should be larger than distb
-                target = torch.FloatTensor(embedded_a.size()[1]).fill_(1)
-                target = pytutils.to_var( target, self.cuda)
-
+                embedded_a, embedded_p, embedded_n = self.net(data_anch, data_pos, data_neg)                
+                target = torch.FloatTensor(embedded_a.size()[1]).fill_(1)     
+                if self.cuda: target = target.cuda()
+                                
                 # measure accuracy and record loss
                 loss_triplet = self.criterion(embedded_a, embedded_p, embedded_n, target)
+                #print(batch_size,  (embedded_a-embedded_p).norm(), (embedded_n-embedded_p).norm()  ,loss_triplet, flush=True)
+                
+                
                 loss_embedd = embedded_a.norm(2) + embedded_p.norm(2) + embedded_n.norm(2)
                 loss = loss_triplet #+ 0.001 * loss_embedd
                 acc = self.accuracy(embedded_a, embedded_p, embedded_n)
@@ -335,7 +363,8 @@ class NeuralNetTriplet(NeuralNet):
                 {'acc': acc },
                 batch_size,
                 )
-
+               
+                
                 # measure elapsed time
                 batch_time.update(time.time() - end)
                 end = time.time()
