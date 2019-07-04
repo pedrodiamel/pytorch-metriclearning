@@ -12,7 +12,10 @@ from . import cars196
 from . import stanford_online_products
 from . import afew
 from . import celeba
-
+from . import alot
+from . import brodatz
+from . import kylberg
+from . import umd
 
 def create_folder(pathname, name):    
     # create path name dir        
@@ -51,6 +54,12 @@ class FactoryDataset(object):
 
 
     celeba='celeba'
+
+    #texture datasets
+    alot = 'alot'
+    brodatz = 'brodatz'
+    kylberg_dataset = 'kylberg dataset'
+    umd = 'umd'
 
     
     @classmethod
@@ -199,7 +208,29 @@ class FactoryDataset(object):
             pathname = create_folder(pathname, 'cars196')
             data = cars196.Cars196MetricLearning(pathname, train=btrain,  download=download)
             data.labels = np.array( data.targets ) 
-            
+
+        # texture dataset
+
+        elif name == 'alot':
+            btrain=(subset=='train')
+            pathname = create_folder(pathname, 'alot')
+            data = alot.Alot(pathname, train=btrain, download=False, img_size=32)
+            data.labels = np.array(data.targets)
+        elif name=='brodatz':
+            btrain=(subset=='train')
+            pathname = create_folder(pathname, 'brodatz')
+            data = brodatz.BrodatzMetricLearning(pathname, train=btrain, download=False, img_size=32)
+            data.labels = np.array(data.targets)
+        elif name == 'kylberg':
+            btrain=(subset=='train')
+            pathname = create_folder(pathname, 'kylberg dataset')
+            data = kylberg.KylbergMetricLearning(pathname, train=btrain, download=False, img_size=32)
+            data.labels = np.array(data.targets)
+        elif name == 'umd':
+            btrain=(subset=='train')
+            pathname = create_folder(pathname, 'UMD')
+            data = umd.UMDMetricLearning(pathname, train=btrain, download=False, img_size=32)
+            data.labels = np.array(data.targets)
         else: 
             assert(False)
 
