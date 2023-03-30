@@ -1,21 +1,23 @@
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import numpy as np
 
-def to_gpu( x, cuda ):
+
+def to_gpu(x, cuda):
     return x.cuda() if cuda else x
 
+
 def one_hot_embedding(labels, num_classes):
-    '''Embedding labels to one-hot form.
+    """Embedding labels to one-hot form.
     Args:
       labels: (LongTensor) class labels, sized [N,].
       num_classes: (int) number of classes.
     Returns:
       (tensor) encoded labels, sized [N,#classes].
-    '''
+    """
     y = torch.eye(num_classes)  # [D,D]
-    return y[labels.long()]     # [N,D]
+    return y[labels.long()]  # [N,D]
 
 
 class EmbHingeLoss(nn.Module):
@@ -64,63 +66,62 @@ class EmbHingeLoss(nn.Module):
         self.swap = swap
 
     def forward(self, anchor, positive, negative, target):
-        return F.triplet_margin_loss(anchor, positive, negative, self.margin,
-                                     self.p, self.eps, self.swap)
+        return F.triplet_margin_loss(anchor, positive, negative, self.margin, self.p, self.eps, self.swap)
+
 
 class EmbSquareHingeLoss(nn.Module):
-    
-    def __init__(self, margin=1.0, p=2, eps=1e-6 ):
+    def __init__(self, margin=1.0, p=2, eps=1e-6):
         super(EmbSquareHingeLoss, self).__init__()
         self.margin = margin
         self.p = p
         self.eps = eps
 
-    def forward(self, anchor, positive, negative, target):        
+    def forward(self, anchor, positive, negative, target):
         dist_pos = F.pairwise_distance(anchor, positive, p=self.p, eps=self.eps)
         dist_neg = F.pairwise_distance(anchor, negative, p=self.p, eps=self.eps)
         triplet_loss = nn.MarginRankingLoss(margin=self.margin)(torch.pow(dist_pos, 2), torch.pow(dist_neg, 2), target)
         return triplet_loss
-    
+
+
 class EmbSoftHingeLoss(nn.Module):
-    
-    def __init__(self, margin=1.0, p=2, eps=1e-6 ):
+    def __init__(self, margin=1.0, p=2, eps=1e-6):
         super(EmbSoftHingeLoss, self).__init__()
         self.margin = margin
         self.p = p
         self.eps = eps
 
-    def forward(self, anchor, positive, negative, target):        
-        dist_pos  = F.pairwise_distance(  anchor, positive, p=self.p, eps=self.eps)
-        dist_neg1 = F.pairwise_distance(  anchor, negative, p=self.p, eps=self.eps)
+    def forward(self, anchor, positive, negative, target):
+        dist_pos = F.pairwise_distance(anchor, positive, p=self.p, eps=self.eps)
+        dist_neg1 = F.pairwise_distance(anchor, negative, p=self.p, eps=self.eps)
         dist_neg2 = F.pairwise_distance(positive, negative, p=self.p, eps=self.eps)
-        dist_neg_s = (torch.exp(self.margin - dist_neg1) + torch.exp(self.margin - dist_neg2))
+        dist_neg_s = torch.exp(self.margin - dist_neg1) + torch.exp(self.margin - dist_neg2)
         loss = torch.mean(torch.log(dist_neg_s) + dist_pos)
         return loss
 
+
 class Accuracy(nn.Module):
-    
-    def __init__(self ):
+    def __init__(self):
         super(Accuracy, self).__init__()
-        
+
     def forward(self, anchor, positive, negative):
         margin = 0.0
         dist_pos = F.pairwise_distance(anchor, positive)
-        dist_neg = F.pairwise_distance(anchor, negative)    
-        pred = (dist_neg - dist_pos - margin).cpu().data    
-        return (pred > 0).float().sum()*1.0/dist_pos.size()[0]
+        dist_neg = F.pairwise_distance(anchor, negative)
+        pred = (dist_neg - dist_pos - margin).cpu().data
+        return (pred > 0).float().sum() * 1.0 / dist_pos.size()[0]
 
 
 ## Baseline clasification
 
+
 class TopkAccuracy(nn.Module):
-    
     def __init__(self, topk=(1,)):
         super(TopkAccuracy, self).__init__()
         self.topk = topk
 
     def forward(self, output, target):
         """Computes the precision@k for the specified values of k"""
-        
+
         maxk = max(self.topk)
         batch_size = target.size(0)
 
@@ -130,13 +131,12 @@ class TopkAccuracy(nn.Module):
         res = []
         for k in self.topk:
             correct_k = correct[:k].view(-1).float().sum(0, keepdim=True)
-            res.append( correct_k.mul_(100.0 / batch_size) )
+            res.append(correct_k.mul_(100.0 / batch_size))
 
         return res
 
 
-
-class ConfusionMeter( object ):
+class ConfusionMeter(object):
     """Maintains a confusion matrix for a given calssification problem.
     https://github.com/pytorch/tnt/tree/master/torchnet/meter
 
@@ -177,35 +177,27 @@ class ConfusionMeter( object ):
         predicted = predicted.cpu().numpy()
         target = target.cpu().numpy()
 
-        assert predicted.shape[0] == target.shape[0], \
-            'number of targets and predicted outputs do not match'
+        assert predicted.shape[0] == target.shape[0], "number of targets and predicted outputs do not match"
 
         if np.ndim(predicted) != 1:
-            assert predicted.shape[1] == self.k, \
-                'number of predictions does not match size of confusion matrix'
+            assert predicted.shape[1] == self.k, "number of predictions does not match size of confusion matrix"
             predicted = np.argmax(predicted, 1)
         else:
-            assert (predicted.max() < self.k) and (predicted.min() >= 0), \
-                'predicted values are not between 1 and k'
+            assert (predicted.max() < self.k) and (predicted.min() >= 0), "predicted values are not between 1 and k"
 
         onehot_target = np.ndim(target) != 1
         if onehot_target:
-            assert target.shape[1] == self.k, \
-                'Onehot target does not match size of confusion matrix'
-            assert (target >= 0).all() and (target <= 1).all(), \
-                'in one-hot encoding, target values should be 0 or 1'
-            assert (target.sum(1) == 1).all(), \
-                'multi-label setting is not supported'
+            assert target.shape[1] == self.k, "Onehot target does not match size of confusion matrix"
+            assert (target >= 0).all() and (target <= 1).all(), "in one-hot encoding, target values should be 0 or 1"
+            assert (target.sum(1) == 1).all(), "multi-label setting is not supported"
             target = np.argmax(target, 1)
         else:
-            assert (predicted.max() < self.k) and (predicted.min() >= 0), \
-                'predicted values are not between 0 and k-1'
+            assert (predicted.max() < self.k) and (predicted.min() >= 0), "predicted values are not between 0 and k-1"
 
         # hack for bincounting 2 arrays together
         x = predicted + self.k * target
-        bincount_2d = np.bincount(x.astype(np.int32),
-                                  minlength=self.k ** 2)
-        assert bincount_2d.size == self.k ** 2
+        bincount_2d = np.bincount(x.astype(np.int32), minlength=self.k**2)
+        assert bincount_2d.size == self.k**2
         conf = bincount_2d.reshape((self.k, self.k))
 
         self.conf += conf
@@ -222,4 +214,3 @@ class ConfusionMeter( object ):
             return conf / conf.sum(1).clip(min=1e-12)[:, None]
         else:
             return self.conf
-

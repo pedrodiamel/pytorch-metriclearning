@@ -1,64 +1,66 @@
 # Fusion Rulers
 # @autor: Pedro Diamel Marrero Fernandez
-# 
-# 
+#
+#
 #       +-----+  dp_1
 #     --| cnn |---------+
 #       +-----+         |
-#                       | 
+#                       |
 #       +-----+  dp_2   |     +--------+
 #     --| cnn |---------+ ----| Fusion |-----------+
 #       +-----+         |     +--------+
 #                       .        |
 #                       .        SOFT, HARD, TR
 #                       .        Soft: sRp, sRs, sRmx, sRmi, sRmd, sRmv
-#       +-----+  dp_L   |        Hard: hWmv, hRec, hNb  
+#       +-----+  dp_L   |        Hard: hWmv, hRec, hNb
 #     --| cnn |---------+        Train: tFi, tLop, tMb, tMsvm
 #       +-----+
-
 
 
 ## On Combining Classifiers
 # - Combining soft ruler
 # - https://dspace.cvut.cz/bitstream/handle/10467/9443/1998-On-combining-classifiers.pdf?sequence=1
-    
-def product_ruler( dp, P=None ):
+
+
+def product_ruler(dp, P=None):
     """
     Ecuation. Josef Kittler [7]
     https://dspace.cvut.cz/bitstream/handle/10467/9443/1998-On-combining-classifiers.pdf?sequence=1
-    Soft Product Rule    
+    Soft Product Rule
     P^{(-(R-1))}( w_j )\prod_iP(w_j|x_i)  = \max_k P^{(-(R-1))}( w_k ) \prod_i
     P(w_k|x_i) (1)
     which under the assumption of equal priors, simplifies to the following:
-    \prod_iP(w_j|x_i)  = \max_k \prod_i P(w_k|x_i) (2)    
+    \prod_iP(w_j|x_i)  = \max_k \prod_i P(w_k|x_i) (2)
     Args:
         @dp: []_nxcxl
         @P: class prior []_c
-    """    
+    """
     p = dp.prod(2)
     if P is not None:
         l = dp.shape[2]
-        p = P**-(l-1)*p
+        p = P ** -(l - 1) * p
     return p
 
-def sum_ruler( dp, P=None ):
+
+def sum_ruler(dp, P=None):
     """
     Ecuation. Josef Kittler [11]
     https://dspace.cvut.cz/bitstream/handle/10467/9443/1998-On-combining-classifiers.pdf?sequence=1
     Soft Sum Ruler
     $$(1-R)P( w_j ) + \sum_iP(w_j|x_i)  = \max_k [ (1-R)P(w_k) + \sum_iP(w_k|x_i)]$$
     which under the assumption of equal priors simplifies to the following:
-    $$\sum_iP(w_j|x_i)  = \max_k \sum_iP(w_k|x_i)$$    
+    $$\sum_iP(w_j|x_i)  = \max_k \sum_iP(w_k|x_i)$$
     Args:
         @dp: []_nxcxl
     """
     p = dp.sum(2)
     if P is not None:
         l = dp.shape[2]
-        p = (1-l)*P + p
+        p = (1 - l) * P + p
     return p
 
-def max_ruler( dp, P=None ):
+
+def max_ruler(dp, P=None):
     """
     Ecuation. Josef Kittler [14][15]
     https://dspace.cvut.cz/bitstream/handle/10467/9443/1998-On-combining-classifiers.pdf?sequence=1
@@ -69,10 +71,11 @@ def max_ruler( dp, P=None ):
     p = dp.max(2)
     if P is not None:
         l = dp.shape[2]
-        p = (1-l)*P + l*p
+        p = (1 - l) * P + l * p
     return p
 
-def min_ruler( dp, P=None ):
+
+def min_ruler(dp, P=None):
     """
     Ecuation. Josef Kittler [16]
     https://dspace.cvut.cz/bitstream/handle/10467/9443/1998-On-combining-classifiers.pdf?sequence=1
@@ -83,12 +86,12 @@ def min_ruler( dp, P=None ):
     p = dp.min(2)
     if P is not None:
         l = dp.shape[2]
-        p = P**-(l-1)*p
-        p = (1-l)*P + l*p
+        p = P ** -(l - 1) * p
+        p = (1 - l) * P + l * p
     return p
 
 
-def majority_ruler( dp  ):
+def majority_ruler(dp):
     """
     Ecuation. Josef Kittler [20]
     https://dspace.cvut.cz/bitstream/handle/10467/9443/1998-On-combining-classifiers.pdf?sequence=1
@@ -96,20 +99,20 @@ def majority_ruler( dp  ):
     Args:
         @dp: []_nxcxl
     """
-    n,c,l = dp.shape
-    p = np.argmax(dp,axis=1)
-    
-    dki = np.zeros((n,c))
+    n, c, l = dp.shape
+    p = np.argmax(dp, axis=1)
+
+    dki = np.zeros((n, c))
     for i in range(n):
-        tup = p[i,:]
+        tup = p[i, :]
         for j in range(c):
-            dki[i,j] = np.sum( tup == j )
-        
-    p=dki
+            dki[i, j] = np.sum(tup == j)
+
+    p = dki
     return p
 
 
-def mean_ruler( dp ):
+def mean_ruler(dp):
     """
     Ecuation. Josef Kittler [18]
     https://dspace.cvut.cz/bitstream/handle/10467/9443/1998-On-combining-classifiers.pdf?sequence=1
@@ -119,9 +122,8 @@ def mean_ruler( dp ):
     """
     p = dp.mean(2)
     return p
-    
 
-    
+
 # # test
 # #[n,c,l]
 # #dp = np.random.rand(10,4,3 )
@@ -135,5 +137,3 @@ def mean_ruler( dp ):
 # for f in func:
 #     p = f(dp)
 #     print( p.argmax(1) )
-    
-    

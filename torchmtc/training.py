@@ -81,7 +81,7 @@ def train(cfg: Config, aug: AugmentationConfig):
         pretrained=cfg.trainer.finetuning,
         size_input=cfg.trainer.image_size,
         classes=cfg.trainer.numclass,
-        margin=cfg.trainer.margin
+        margin=cfg.trainer.margin,
     )
 
     # Set cuda cudnn benchmark true
@@ -142,7 +142,7 @@ def train(cfg: Config, aug: AugmentationConfig):
         val_data,
         batch_size=cfg.data.batch_size,
         shuffle=False,
-        sampler = sampler,
+        sampler=sampler,
         num_workers=cfg.data.workers,
         pin_memory=network.cuda,
         drop_last=False,
